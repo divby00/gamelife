@@ -41,8 +41,8 @@ class GameOfLife(object):
 
     DEAD = 0
     ALIVE = 1
-    TILE_HEIGHT = 20
-    TILE_WIDTH = 20
+    TILE_HEIGHT = 10
+    TILE_WIDTH = 10
 
     def __init__(self):
         self._generation = 0
@@ -67,6 +67,8 @@ class GameOfLife(object):
             self._running = True
             self._matrix = numpy.zeros((self._size[1], self._size[0]))
             self._add_random_cells(parser.cells)
+            if parser.cells > 0:
+                self._start = True
 
     def quit(self):
         pygame.quit()
