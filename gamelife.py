@@ -21,22 +21,28 @@ class ArgumentParser(object):
         self._parser = argparse.ArgumentParser(description="Conway's game of life")
         self._parser.add_argument('-w', '--width', type=int, help='Screen width in cells')
         self._parser.add_argument('-e', '--height', type=int, help='Screen height in cells')
+        self._parser.add_argument('-c', '--cells', type=int, help='Random cells at init')
         self._args = self._parser.parse_args()
         self._width = 60 if self._args.width is None else self._args.width
         self._height = 40 if self._args.height is None else self._args.height
+        self._cells = 0 if self._args.cells is None else self._args.cells
         self._size = self._width, self._height
 
     @property
     def size(self):
         return self._size
 
+    @property
+    def cells(self):
+        return self._cells
+
 
 class GameOfLife(object):
 
     DEAD = 0
     ALIVE = 1
-    TILE_HEIGHT = 15
-    TILE_WIDTH = 15
+    TILE_HEIGHT = 20
+    TILE_WIDTH = 20
 
     def __init__(self):
         self._generation = 0
@@ -46,6 +52,7 @@ class GameOfLife(object):
         self._updated_matrix = None
         self._size = (None, None)
         self._mouse_position = None
+        self._start = False
 
     def init(self):
         parser = ArgumentParser()
@@ -59,7 +66,7 @@ class GameOfLife(object):
             pygame.mouse.set_visible(False)
             self._running = True
             self._matrix = numpy.zeros((self._size[1], self._size[0]))
-            self._add_random_cells(500)
+            self._add_random_cells(parser.cells)
 
     def quit(self):
         pygame.quit()
@@ -77,11 +84,21 @@ class GameOfLife(object):
             self._mouse_position = (y, x)
 
             if mouse_info[0]:
-                self._matrix[y][x] = 1
 
-            self._logic()
+                if self._start:
+                    self._matrix = numpy.zeros((self._size[1], self._size[0]))
+                
+                self._matrix[y][x] = 1
+                self._start = False
+                self._generation = 0
+
+            if mouse_info[2]:
+                self._start = True
+
+            if self._start:
+                self._logic()
+                self._generation += 1
             self._render()
-            self._generation += 1
 
     def _logic(self):
         self._updated_matrix = numpy.zeros((self._size[1], self._size[0]))
